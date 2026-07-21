@@ -46,10 +46,10 @@
             <h3>Ajouter une Chasse</h3>
             <label>Nom de la pierre (ex: Magnifique Citrine)</label>
             <input type="text" id="nom" placeholder="Ex: Citrine Ovale 12ct">
-            <label>URL filtrée du site</label>
+            <label>URL filtrée ou exacte du site</label>
             <input type="text" id="url" placeholder="https://www.multicolour.com/...">
-            <label>Mot clé exact à traquer (ex: enhancement: (n) none)</label>
-            <input type="text" id="motcle" placeholder="Ex: (n) none ou 11.2ct">
+            <label>Mot clé à traquer (Optionnel si URL déjà exacte)</label>
+            <input type="text" id="motcle" placeholder="Laisser vide si URL exacte, ou ex: 11.2ct">
             <label>Budget maximum ciblé (Optionnel - ex: 450)</label>
             <input type="number" id="budget" placeholder="Prévenez-moi si le prix passe sous...">
             <button onclick="ajouterAlerte()">Lancer la surveillance</button>
@@ -111,12 +111,13 @@
                 const prixIni = a.prix_initial ? a.prix_initial + " €/$" : "En attente";
                 const prixAct = a.prix_actuel ? a.prix_actuel + " €/$" : "En attente";
                 const budgetTxt = a.budget_max ? "🎯 Budget max : " + a.budget_max + " €/$" : "⏳ Pas de limite budgétaire";
+                const filtreTxt = a.mot_cle ? a.mot_cle : "Page complète (Automatique)";
                 
                 div.innerHTML += `
                     <div class="item" style="opacity: ${estActif ? '1' : '0.4'}">
                         <strong style="color:var(--gold); font-size:16px;">${a.nom}</strong> 
                         <span style="font-size:11px; background:#222; padding:2px 6px; border-radius:4px; margin-left:6px;">${estActif ? '🟢 ACTIF' : '⏸️ PAUSE'}</span><br>
-                        <span style="font-size:13px; color:#ffffff; display:inline-block; margin-top:4px;">🔍 Filtre : <strong>${a.mot_cle}</strong></span><br>
+                        <span style="font-size:13px; color:#ffffff; display:inline-block; margin-top:4px;">🔍 Filtre : <strong>${filtreTxt}</strong></span><br>
                         <span style="font-size:12px; color:var(--muted);">
                             💵 Prix initial : ${prixIni} | 🔥 Actuel : <span class="price-tag">${prixAct}</span><br>
                             ${budgetTxt} <br>
@@ -137,7 +138,9 @@
             const url = document.getElementById('url').value.trim();
             const mot_cle = document.getElementById('motcle').value.trim();
             const budget = document.getElementById('budget').value.trim();
-            if (!nom || !url || !mot_cle) return alert("Veuillez remplir le nom, l'URL et le mot-clé !");
+            
+            // LA CORRECTION EST ICI : On exige uniquement le nom et l'URL !
+            if (!nom || !url) return alert("Veuillez remplir au moins le nom de la pierre et l'URL !");
             
             db.alertes.push({ 
                 nom, url, mot_cle, 
@@ -157,14 +160,14 @@
 
         async function modifier(i) {
             const a = db.alertes[i];
-            const nouvMot = prompt(`Modifier le mot-clé pour "${a.nom}" :`, a.mot_cle);
+            const nouvMot = prompt(`Modifier le mot-clé pour "${a.nom}" (laisser vide si URL exacte) :`, a.mot_cle || "");
             if (nouvMot === null) return;
             const nouvBud = prompt(`Modifier le budget max pour "${a.nom}" (laisser vide pour aucun) :`, a.budget_max || "");
             if (nouvBud === null) return;
 
             db.alertes[i].mot_cle = nouvMot.trim();
             db.alertes[i].budget_max = nouvBud.trim() !== "" ? parseFloat(nouvBud) : null;
-            db.alertes[i].deja_signale = false; // Relance une recherche à zéro
+            db.alertes[i].deja_signale = false; 
             db.alertes[i].seuil_signale = false;
             db.alertes[i].prix_initial = null;
             db.alertes[i].prix_actuel = null;
