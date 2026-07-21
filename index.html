@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Mon Cabinet Privé</title>
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/512/gem-stone.png">
+    <style>
+        :root { --bg: #0f1016; --card: #1a1c24; --gold: #d4af37; --muted: #8a8f9d; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; padding: 30px 20px 90px 20px; margin: 0; }
+        h1 { color: var(--gold); text-align: center; font-weight: 300; margin-bottom: 25px; letter-spacing: 1px; }
+        h3 { color: var(--gold); margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom: 8px; }
+        .card { background: var(--card); padding: 18px; border-radius: 14px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        input:focus { border-color: var(--gold); outline: none; }
+        button { background: linear-gradient(135deg, #d4af37, #aa820a); color: black; padding: 14px; width: 100%; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; }
+        button:active { opacity: 0.8; }
+        .btn-box { display: flex; gap: 6px; margin-top: 12px; }
+        .btn-pause { background: #6b7280; color: white; padding: 8px 10px; font-size: 12px; border-radius: 6px; width: 100%; border:none; font-weight:bold; cursor:pointer;}
+        .btn-active { background: #10b981; color: white; padding: 8px 10px; font-size: 12px; border-radius: 6px; width: 100%; border:none; font-weight:bold; cursor:pointer;}
+        .btn-mod { background: #3b82f6; color: white; padding: 8px 10px; font-size: 12px; border-radius: 6px; width: 100%; border:none; font-weight:bold; cursor:pointer;}
+        .btn-del { background: #ef4444; color: white; padding: 8px 10px; font-size: 12px; border-radius: 6px; width: 100%; border:none; font-weight:bold; cursor:pointer;}
+        .item { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 16px 0; }
+        .item:last-child { border-bottom: none; }
+        .log { background: #000; color: #39ff14; font-family: monospace; font-size: 11px; padding: 12px; border-radius: 8px; max-height: 120px; overflow-y: auto; }
+        .price-tag { color: #10b981; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>💎 Cabinet de Surveillance</h1>
+    
+    <div class="card" id="config-div">
+        <h3>Connexion au Coffre Secret</h3>
+        <label>Votre Clé GitHub (ghp_...)</label>
+        <input type="password" id="token" placeholder="Collez votre token classique">
+        <label>Votre nom d'utilisateur GitHub</label>
+        <input type="text" id="username" placeholder="Ex: MonPseudo">
+        <button onclick="sauvegarderCle()">Lier mon iPhone</button>
+    </div>
+
+    <div id="app-div" style="display:none;">
+        <div class="card">
+            <h3>Ajouter une Chasse</h3>
+            <label>Nom de la pierre (ex: Magnifique Citrine)</label>
+            <input type="text" id="nom" placeholder="Ex: Citrine Ovale 12ct">
+            <label>URL filtrée du site</label>
+            <input type="text" id="url" placeholder="https://www.multicolour.com/...">
+            <label>Mot clé exact à traquer (ex: enhancement: (n) none)</label>
+            <input type="text" id="motcle" placeholder="Ex: (n) none ou 11.2ct">
+            <label>Budget maximum ciblé (Optionnel - ex: 450)</label>
+            <input type="number" id="budget" placeholder="Prévenez-moi si le prix passe sous...">
+            <button onclick="ajouterAlerte()">Lancer la surveillance</button>
+        </div>
+
+        <div class="card">
+            <h3>Mes Recherches et Traqueurs</h3>
+            <div id="liste-alertes">Connexion au coffre...</div>
+        </div>
+
+        <div class="card">
+            <h3>Historique de Passage du Robot</h3>
+            <div class="log" id="log-robot">Aucun scan récent.</div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('ghp_token');
+        const user = localStorage.getItem('ghp_user');
+        const repo = "moteur-alertes-prive";
+        let db = { alertes: [], historique: [] };
+        let sha = "";
+
+        if (token && user) {
+            document.getElementById('config-div').style.display = 'none';
+            document.getElementById('app-div').style.display = 'block';
+            charger();
+        }
+
+        function sauvegarderCle() {
+            localStorage.setItem('ghp_token', document.getElementById('token').value.trim());
+            localStorage.setItem('ghp_user', document.getElementById('username').value.trim());
+            window.location.reload();
+        }
+
+        async function api(method, body = null) {
+            const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/alertes.json`, {
+                method,
+                headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+                body: body ? JSON.stringify(body) : null
+            });
+            return res.json();
+        }
+
+        async function charger() {
+            try {
+                const r = await api("GET");
+                sha = r.sha;
+                db = JSON.parse(decodeURIComponent(escape(atob(r.content))));
+                afficher();
+            } catch (e) { alert("Erreur d'accès au coffre GitHub. Vérifiez vos identifiants."); }
+        }
+
+        function afficher() {
+            const div = document.getElementById('liste-alertes');
+            div.innerHTML = db.alertes.length ? "" : "<p style='color:#8a8f9d;font-size:13px;'>Aucun traqueur actif.</p>";
+            db.alertes.forEach((a, i) => {
+                const estActif = a.actif !== false;
+                const prixIni = a.prix_initial ? a.prix_initial + " €/$" : "En attente";
+                const prixAct = a.prix_actuel ? a.prix_actuel + " €/$" : "En attente";
+                const budgetTxt = a.budget_max ? "🎯 Budget max : " + a.budget_max + " €/$" : "⏳ Pas de limite budgétaire";
+                
+                div.innerHTML += `
+                    <div class="item" style="opacity: ${estActif ? '1' : '0.4'}">
+                        <strong style="color:var(--gold); font-size:16px;">${a.nom}</strong> 
+                        <span style="font-size:11px; background:#222; padding:2px 6px; border-radius:4px; margin-left:6px;">${estActif ? '🟢 ACTIF' : '⏸️ PAUSE'}</span><br>
+                        <span style="font-size:13px; color:#ffffff; display:inline-block; margin-top:4px;">🔍 Filtre : <strong>${a.mot_cle}</strong></span><br>
+                        <span style="font-size:12px; color:var(--muted);">
+                            💵 Prix initial : ${prixIni} | 🔥 Actuel : <span class="price-tag">${prixAct}</span><br>
+                            ${budgetTxt} <br>
+                            ⏱️ Dernier scan : ${a.derniere_verif || "Nouveau"}
+                        </span>
+                        <div class="btn-box">
+                            <button class="${estActif ? 'btn-pause' : 'btn-active'}" onclick="togglePause(${i})">${estActif ? '⏸️ Pause' : '▶️ Activer'}</button>
+                            <button class="btn-mod" onclick="modifier(${i})">✏️ Éditer</button>
+                            <button class="btn-del" onclick="supprimer(${i})">🗑️ Retirer</button>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('log-robot').innerHTML = db.historique.map(h => `[${h.date}] ${h.statut}`).reverse().join("<br>") || "Aucun scan enregistré.";
+        }
+
+        async function ajouterAlerte() {
+            const nom = document.getElementById('nom').value.trim();
+            const url = document.getElementById('url').value.trim();
+            const mot_cle = document.getElementById('motcle').value.trim();
+            const budget = document.getElementById('budget').value.trim();
+            if (!nom || !url || !mot_cle) return alert("Veuillez remplir le nom, l'URL et le mot-clé !");
+            
+            db.alertes.push({ 
+                nom, url, mot_cle, 
+                budget_max: budget ? parseFloat(budget) : null, 
+                actif: true, derniere_verif: "En attente...", 
+                deja_signale: false, seuil_signale: false,
+                prix_initial: null, prix_actuel: null
+            });
+            await sauver("Lancement traqueur : " + nom);
+            document.getElementById('nom').value = ""; document.getElementById('url').value = ""; document.getElementById('motcle').value = ""; document.getElementById('budget').value = "";
+        }
+
+        async function togglePause(i) {
+            db.alertes[i].actif = (db.alertes[i].actif === false) ? true : false;
+            await sauver("Changement statut (Pause/Actif) : " + db.alertes[i].nom);
+        }
+
+        async function modifier(i) {
+            const a = db.alertes[i];
+            const nouvMot = prompt(`Modifier le mot-clé pour "${a.nom}" :`, a.mot_cle);
+            if (nouvMot === null) return;
+            const nouvBud = prompt(`Modifier le budget max pour "${a.nom}" (laisser vide pour aucun) :`, a.budget_max || "");
+            if (nouvBud === null) return;
+
+            db.alertes[i].mot_cle = nouvMot.trim();
+            db.alertes[i].budget_max = nouvBud.trim() !== "" ? parseFloat(nouvBud) : null;
+            db.alertes[i].deja_signale = false; // Relance une recherche à zéro
+            db.alertes[i].seuil_signale = false;
+            db.alertes[i].prix_initial = null;
+            db.alertes[i].prix_actuel = null;
+            db.alertes[i].derniere_verif = "Modifié - Scan imminent";
+            
+            await sauver("Mise à jour critères : " + a.nom);
+        }
+
+        async function supprimer(i) {
+            if (!confirm("Retirer définitivement ce traqueur de votre liste ?")) return;
+            const nom = db.alertes[i].nom;
+            db.alertes.splice(i, 1);
+            await sauver("Retrait du traqueur : " + nom);
+        }
+
+        async function sauver(msg) {
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(db, null, 2))));
+            const r = await api("PUT", { message: msg, content, sha });
+            sha = r.content.sha;
+            charger();
+            alert("✅ Coffre-fort mis à jour !");
+        }
+    </script>
+</body>
+</html>
