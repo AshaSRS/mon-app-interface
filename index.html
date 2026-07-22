@@ -6,27 +6,54 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Mon Cabinet Privé</title>
+    <!-- N'oublie pas de remettre ton vrai pseudo GitHub ci-dessous si besoin -->
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/AshaSRS/mon-app-interface/main/icone.jpg">
     <style>
-        :root { --bg: #0f1016; --card: #1a1c24; --gold: #d4af37; --muted: #8a8f9d; }
-        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; padding: 30px 20px 90px 20px; margin: 0; }
-        h1 { color: var(--gold); text-align: center; font-weight: 300; margin-bottom: 25px; letter-spacing: 1px; }
-        h3 { color: var(--gold); margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom: 8px; }
-        .card { background: var(--card); padding: 18px; border-radius: 14px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        input:focus { border-color: var(--gold); outline: none; }
-        button { background: linear-gradient(135deg, #d4af37, #aa820a); color: black; padding: 14px; width: 100%; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; }
-        button:active { opacity: 0.8; }
+        :root { 
+            --bg: #050505; 
+            --gold-light: #ffd700; 
+            --gold-dark: #b8860b; 
+            --card-bg: linear-gradient(145deg, #4a3300, #1a1200); 
+            --text-diamond: #ffffff; 
+            --muted: #d1bfae;
+        }
+        body { background: var(--bg); color: var(--text-diamond); font-family: -apple-system, sans-serif; padding: 20px 15px 90px 15px; margin: 0; }
+        h1 { color: var(--gold-light); text-align: center; font-weight: 300; margin-bottom: 25px; letter-spacing: 1px; text-shadow: 0 0 8px rgba(255,215,0,0.3); }
+        h3 { color: var(--gold-light); margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(255,215,0,0.3); padding-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;}
+        .card { background: var(--card-bg); padding: 18px; border-radius: 14px; margin-bottom: 20px; border: 1px solid var(--gold-dark); box-shadow: 0 6px 15px rgba(184, 134, 11, 0.2); }
+        label { display: block; font-size: 12px; color: var(--gold-light); margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.6); color: var(--text-diamond); border: 1px solid var(--gold-dark); border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        input:focus, select:focus { border-color: var(--gold-light); outline: none; box-shadow: 0 0 5px rgba(255,215,0,0.5); }
+        
+        .btn-main { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; padding: 14px; width: 100%; border: none; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 10px rgba(255,215,0,0.3); margin-bottom:10px;}
+        .btn-main:active { opacity: 0.8; }
+        
+        .btn-scan { background: linear-gradient(135deg, #ff4500, #8b0000); color: white; padding: 12px; width: 100%; border: 1px solid #ff7f50; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; margin-bottom: 15px; }
+        
         .btn-box { display: flex; gap: 6px; margin-top: 12px; }
-        .btn-pause { background: #6b7280; color: white; padding: 8px 10px; font-size: 12px; border-radius: 6px; width: 100%; border:none; font-weight:bold; cursor:pointer;}
-        .btn-active { background: #10b981; color: white; padding: 8px 10px; font-size: 12px; border-radius: 6px; width: 100%; border:none; font-weight:bold; cursor:pointer;}
-        .btn-mod { background: #3b82f6; color: white; padding: 8px 10px; font-size: 12px; border-radius: 6px; width: 100%; border:none; font-weight:bold; cursor:pointer;}
-        .btn-del { background: #ef4444; color: white; padding: 8px 10px; font-size: 12px; border-radius: 6px; width: 100%; border:none; font-weight:bold; cursor:pointer;}
-        .item { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 16px 0; }
+        .btn-action { padding: 8px; font-size: 11px; border-radius: 6px; width: 100%; border:none; font-weight:bold; cursor:pointer; color: white; }
+        .btn-pause { background: #6b7280; }
+        .btn-active { background: #10b981; }
+        .btn-mod { background: #3b82f6; }
+        .btn-del { background: #ef4444; }
+        
+        .item { border-bottom: 1px solid rgba(255,215,0,0.2); padding: 16px 0; }
         .item:last-child { border-bottom: none; }
-        .log { background: #000; color: #39ff14; font-family: monospace; font-size: 11px; padding: 12px; border-radius: 8px; max-height: 120px; overflow-y: auto; }
-        .price-tag { color: #10b981; font-weight: bold; }
+        
+        .log { background: #000; color: #ffd700; font-family: monospace; font-size: 11px; padding: 12px; border-radius: 8px; max-height: 120px; overflow-y: auto; border: 1px solid rgba(255,215,0,0.3); }
+        .price-tag { color: #10b981; font-weight: bold; font-size: 14px; }
+        .badge { font-size:10px; padding:3px 6px; border-radius:4px; font-weight:bold; margin-left:6px; color:#000; }
+        
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row > div { width: 50%; }
+
+        /* Jauge Monitoring */
+        .jauge-bg { background: #000; height: 16px; border-radius: 8px; border: 1px solid var(--gold-dark); overflow: hidden; margin-top: 5px; margin-bottom: 5px; }
+        .jauge-fill { background: linear-gradient(90deg, #10b981, #ffd700); height: 100%; width: 0%; transition: width 1s; }
+        
+        /* Modal Edition */
+        #modal-edit { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .modal-content { background: var(--card-bg); border: 2px solid var(--gold-light); padding: 20px; border-radius: 14px; margin-top: 40px; }
     </style>
 </head>
 <body>
@@ -34,35 +61,126 @@
     
     <div class="card" id="config-div">
         <h3>Connexion au Coffre Secret</h3>
-        <label>Votre Clé GitHub (ghp_...)</label>
-        <input type="password" id="token" placeholder="Collez votre token classique">
-        <label>Votre nom d'utilisateur GitHub</label>
-        <input type="text" id="username" placeholder="Ex: MonPseudo">
-        <button onclick="sauvegarderCle()">Lier mon iPhone</button>
+        <label>Votre Clé GitHub</label>
+        <input type="password" id="token" placeholder="ghp_...">
+        <label>Utilisateur GitHub</label>
+        <input type="text" id="username" placeholder="Ex: AshaSRS">
+        <button class="btn-main" onclick="sauvegarderCle()">Lier mon iPhone</button>
     </div>
 
     <div id="app-div" style="display:none;">
         <div class="card">
-            <h3>Ajouter une Chasse</h3>
-            <label>Nom de la pierre (ex: Magnifique Citrine)</label>
-            <input type="text" id="nom" placeholder="Ex: Citrine Ovale 12ct">
-            <label>URL filtrée ou exacte du site</label>
+            <h3>Ajouter une Recherche</h3>
+            
+            <div class="flex-row">
+                <div>
+                    <label>Catégorie</label>
+                    <select id="type_alerte" onchange="toggleFormulaire()">
+                        <option value="prix">🎯 SNIPER (Prix)</option>
+                        <option value="nouveaute">📡 RADAR (Nouveauté)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Icône</label>
+                    <select id="icone">
+                        <option value="💎">💎 Diamant</option>
+                        <option value="💍">💍 Bague</option>
+                        <option value="🪙">🪙 Pièce d'or</option>
+                        <option value="🌸">🌸 Fleur / Autre</option>
+                    </select>
+                </div>
+            </div>
+
+            <label>Nom (ex: Magnifique Citrine)</label>
+            <input type="text" id="nom" placeholder="Nom de l'alerte">
+            <label>URL exacte ou filtrée</label>
             <input type="text" id="url" placeholder="https://www.multicolour.com/...">
-            <label>Mot clé à traquer (Optionnel si URL déjà exacte)</label>
-            <input type="text" id="motcle" placeholder="Laisser vide si URL exacte, ou ex: 11.2ct">
-            <label>Budget maximum ciblé (Optionnel - ex: 450)</label>
-            <input type="number" id="budget" placeholder="Prévenez-moi si le prix passe sous...">
-            <button onclick="ajouterAlerte()">Lancer la surveillance</button>
+            
+            <!-- Zone spécifique SNIPER -->
+            <div id="zone_sniper">
+                <label>Mot clé à traquer (Optionnel)</label>
+                <input type="text" id="motcle" placeholder="Ex: 11.2ct">
+                <label>Budget maximum (Alerte ciblée)</label>
+                <input type="number" id="budget" placeholder="Ex: 450">
+            </div>
+
+            <!-- Zone spécifique RADAR -->
+            <div id="zone_radar" style="display:none;">
+                <div class="flex-row">
+                    <div><label>Carats Min</label><input type="number" id="c_min" placeholder="Ex: 2" step="0.1"></div>
+                    <div><label>Carats Max</label><input type="number" id="c_max" placeholder="Ex: 30" step="0.1"></div>
+                </div>
+                <div class="flex-row">
+                    <div><label>Prix Min (€/$)</label><input type="number" id="p_min" placeholder="Ex: 100"></div>
+                    <div><label>Prix Max (€/$)</label><input type="number" id="p_max" placeholder="Ex: 1000"></div>
+                </div>
+            </div>
+
+            <!-- Paramétrage de Fréquence -->
+            <h3 style="font-size:13px; margin-top:10px; border-bottom:1px solid rgba(255,215,0,0.1);">Horloge & Fréquence</h3>
+            <div class="flex-row">
+                <div>
+                    <label>Jours Actifs</label>
+                    <select id="freq_jours">
+                        <option value="tous">Tous les jours</option>
+                        <option value="semaine">Lun au Ven (Semaine)</option>
+                        <option value="weekend">Sam et Dim (Week-end)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Période</label>
+                    <select id="freq_periode">
+                        <option value="24h">24h/24 (Continu)</option>
+                        <option value="jour">Jour (7h - 22h)</option>
+                        <option value="nuit">Nuit (22h - 7h)</option>
+                    </select>
+                </div>
+            </div>
+            <label>Rythme de vérification</label>
+            <select id="freq_heures">
+                <option value="30m">Toutes les 30 minutes</option>
+                <option value="1h">Toutes les heures</option>
+                <option value="2h">Toutes les 2 heures</option>
+                <option value="1x_matin">1x par jour (Matin 9h)</option>
+                <option value="1x_soir">1x par jour (Soir 20h)</option>
+                <option value="3x_jour">3x par jour (Matin, Midi, Soir)</option>
+            </select>
+
+            <button class="btn-main" onclick="ajouterAlerte()">Activer la surveillance</button>
         </div>
+
+        <button class="btn-scan" onclick="lancerScanManuel()">🚀 FORCER UN SCAN GÉNÉRAL IMMÉDIAT</button>
 
         <div class="card">
             <h3>Mes Recherches et Traqueurs</h3>
-            <div id="liste-alertes">Connexion au coffre...</div>
+            <div id="liste-alertes">Connexion au coffre d'or...</div>
+        </div>
+
+        <div class="card" id="monitoring-card">
+            <h3>📊 Monitoring & Quotas GitHub</h3>
+            <p style="font-size:12px; color:var(--muted); margin-bottom:5px;">Temps serveur utilisé ce mois-ci (Estimé) : <strong id="quota-text" style="color:white;">Calcul...</strong></p>
+            <div class="jauge-bg"><div class="jauge-fill" id="jauge-bar"></div></div>
+            <p style="font-size:10px; color:gray; text-align:right; margin-top:2px;">Plafond gratuit : 2000 min/mois</p>
         </div>
 
         <div class="card">
-            <h3>Historique de Passage du Robot</h3>
+            <h3>Historique de Passage</h3>
             <div class="log" id="log-robot">Aucun scan récent.</div>
+        </div>
+    </div>
+
+    <!-- MODAL D'EDITION -->
+    <div id="modal-edit">
+        <div class="modal-content">
+            <h3 id="edit-titre">Éditer la Recherche</h3>
+            <input type="hidden" id="edit-id">
+            <label>Nom</label><input type="text" id="edit-nom">
+            <label>URL</label><input type="text" id="edit-url">
+            <label>Mot Clé</label><input type="text" id="edit-motcle">
+            <div class="flex-row">
+                <button class="btn-main" onclick="sauvegarderEdition()">💾 Sauvegarder</button>
+                <button class="btn-main" style="background:#444; color:white; border:1px solid #777;" onclick="fermerModal()">❌ Annuler</button>
+            </div>
         </div>
     </div>
 
@@ -77,6 +195,7 @@
             document.getElementById('config-div').style.display = 'none';
             document.getElementById('app-div').style.display = 'block';
             charger();
+            estimerQuota();
         }
 
         function sauvegarderCle() {
@@ -85,10 +204,15 @@
             window.location.reload();
         }
 
+        function toggleFormulaire() {
+            const type = document.getElementById('type_alerte').value;
+            document.getElementById('zone_sniper').style.display = type === 'prix' ? 'block' : 'none';
+            document.getElementById('zone_radar').style.display = type === 'nouveaute' ? 'block' : 'none';
+        }
+
         async function api(method, body = null) {
             const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/alertes.json`, {
-                method,
-                headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+                method, headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
                 body: body ? JSON.stringify(body) : null
             });
             return res.json();
@@ -100,87 +224,129 @@
                 sha = r.sha;
                 db = JSON.parse(decodeURIComponent(escape(atob(r.content))));
                 afficher();
-            } catch (e) { alert("Erreur d'accès au coffre GitHub. Vérifiez vos identifiants."); }
+            } catch (e) { alert("Erreur de clé. Le coffre est verrouillé."); }
         }
 
         function afficher() {
             const div = document.getElementById('liste-alertes');
-            div.innerHTML = db.alertes.length ? "" : "<p style='color:#8a8f9d;font-size:13px;'>Aucun traqueur actif.</p>";
+            let htmlSniper = `<h4 style="color:#b8860b; border-bottom:1px solid #b8860b; padding-bottom:5px;">🎯 CIBLES SNIPER</h4>`;
+            let htmlRadar = `<h4 style="color:#b8860b; border-bottom:1px solid #b8860b; padding-bottom:5px; margin-top:25px;">📡 RADARS ACTIFS</h4>`;
+            let aSniper = false, aRadar = false;
+
             db.alertes.forEach((a, i) => {
                 const estActif = a.actif !== false;
-                const prixIni = a.prix_initial ? a.prix_initial + " €/$" : "En attente";
-                const prixAct = a.prix_actuel ? a.prix_actuel + " €/$" : "En attente";
-                const budgetTxt = a.budget_max ? "🎯 Budget max : " + a.budget_max + " €/$" : "⏳ Pas de limite budgétaire";
-                const filtreTxt = a.mot_cle ? a.mot_cle : "Page complète (Automatique)";
+                const isRadar = a.type === 'nouveaute';
+                const icone = a.icone || "💎";
+                const badgeColor = estActif ? "background:#ffd700;" : "background:#555; color:#ccc;";
                 
-                div.innerHTML += `
-                    <div class="item" style="opacity: ${estActif ? '1' : '0.4'}">
-                        <strong style="color:var(--gold); font-size:16px;">${a.nom}</strong> 
-                        <span style="font-size:11px; background:#222; padding:2px 6px; border-radius:4px; margin-left:6px;">${estActif ? '🟢 ACTIF' : '⏸️ PAUSE'}</span><br>
-                        <span style="font-size:13px; color:#ffffff; display:inline-block; margin-top:4px;">🔍 Filtre : <strong>${filtreTxt}</strong></span><br>
-                        <span style="font-size:12px; color:var(--muted);">
-                            💵 Prix initial : ${prixIni} | 🔥 Actuel : <span class="price-tag">${prixAct}</span><br>
-                            ${budgetTxt} <br>
-                            ⏱️ Dernier scan : ${a.derniere_verif || "Nouveau"}
+                // Textes de statut
+                let statutTxt = "";
+                if (isRadar) {
+                    statutTxt = `🔍 Statut : <span class="price-tag">${a.prix_actuel || "En attente"}</span><br>`;
+                    if(a.c_min || a.c_max) statutTxt += `⚖️ Filtre : ${a.c_min||0}ct à ${a.c_max||"Max"}ct<br>`;
+                    if(a.p_min || a.p_max) statutTxt += `💰 Prix : ${a.p_min||0} à ${a.p_max||"Max"}<br>`;
+                } else {
+                    statutTxt = `💵 Initial : ${a.prix_initial || "?"} | 🔥 Actuel : <span class="price-tag">${a.prix_actuel || "En attente"}</span><br>`;
+                    if(a.budget_max) statutTxt += `🎯 Budget : ${a.budget_max}<br>`;
+                }
+
+                const rythm = a.frequence ? `⏱️ Fréq: ${a.frequence.heures} (${a.frequence.periode})` : `⏱️ Fréq: 30m`;
+
+                const itemHtml = `
+                    <div class="item" style="opacity: ${estActif ? '1' : '0.5'}">
+                        <strong style="color:var(--text-diamond); font-size:16px;">${icone} ${a.nom}</strong> 
+                        <span class="badge" style="${badgeColor}">${estActif ? '🟢 ACTIF' : '⏸️ PAUSE'}</span><br>
+                        <span style="font-size:12px; color:var(--muted); margin-top:6px; display:inline-block;">
+                            ${statutTxt}
+                            ${rythm} | Maj: ${a.derniere_verif || "Nouveau"}
                         </span>
                         <div class="btn-box">
-                            <button class="${estActif ? 'btn-pause' : 'btn-active'}" onclick="togglePause(${i})">${estActif ? '⏸️ Pause' : '▶️ Activer'}</button>
-                            <button class="btn-mod" onclick="modifier(${i})">✏️ Éditer</button>
-                            <button class="btn-del" onclick="supprimer(${i})">🗑️ Retirer</button>
+                            <button class="btn-action ${estActif ? 'btn-pause' : 'btn-active'}" onclick="togglePause(${i})">${estActif ? '⏸️' : '▶️'}</button>
+                            <button class="btn-action btn-mod" onclick="ouvrirModal(${i})">✏️ Éditer</button>
+                            <button class="btn-action btn-del" onclick="supprimer(${i})">🗑️</button>
                         </div>
                     </div>`;
+
+                if (isRadar) { htmlRadar += itemHtml; aRadar = true; } 
+                else { htmlSniper += itemHtml; aSniper = true; }
             });
-            document.getElementById('log-robot').innerHTML = db.historique.map(h => `[${h.date}] ${h.statut}`).reverse().join("<br>") || "Aucun scan enregistré.";
+
+            if (!aSniper) htmlSniper += "<p style='font-size:12px; color:gray;'>Aucun Sniper.</p>";
+            if (!aRadar) htmlRadar += "<p style='font-size:12px; color:gray;'>Aucun Radar.</p>";
+
+            div.innerHTML = htmlSniper + htmlRadar;
+            document.getElementById('log-robot').innerHTML = db.historique.map(h => `[${h.date}] ${h.statut}`).reverse().join("<br>") || "Aucun scan.";
         }
 
         async function ajouterAlerte() {
+            const type = document.getElementById('type_alerte').value;
             const nom = document.getElementById('nom').value.trim();
             const url = document.getElementById('url').value.trim();
-            const mot_cle = document.getElementById('motcle').value.trim();
-            const budget = document.getElementById('budget').value.trim();
+            if (!nom || !url) return alert("Nom et URL sont obligatoires !");
             
-            // LA CORRECTION EST ICI : On exige uniquement le nom et l'URL !
-            if (!nom || !url) return alert("Veuillez remplir au moins le nom de la pierre et l'URL !");
-            
-            db.alertes.push({ 
-                nom, url, mot_cle, 
-                budget_max: budget ? parseFloat(budget) : null, 
+            let nouvelle = {
+                nom, url, type,
+                icone: document.getElementById('icone').value,
+                mot_cle: document.getElementById('motcle').value.trim(),
                 actif: true, derniere_verif: "En attente...", 
                 deja_signale: false, seuil_signale: false,
-                prix_initial: null, prix_actuel: null
-            });
-            await sauver("Lancement traqueur : " + nom);
-            document.getElementById('nom').value = ""; document.getElementById('url').value = ""; document.getElementById('motcle').value = ""; document.getElementById('budget').value = "";
+                prix_initial: null, prix_actuel: null, empreinte_radar: [],
+                frequence: {
+                    jours: document.getElementById('freq_jours').value,
+                    heures: document.getElementById('freq_heures').value,
+                    periode: document.getElementById('freq_periode').value
+                }
+            };
+
+            if (type === 'prix') {
+                const b = document.getElementById('budget').value;
+                nouvelle.budget_max = b ? parseFloat(b) : null;
+            } else {
+                const cmin = document.getElementById('c_min').value, cmax = document.getElementById('c_max').value;
+                const pmin = document.getElementById('p_min').value, pmax = document.getElementById('p_max').value;
+                nouvelle.c_min = cmin ? parseFloat(cmin) : null;
+                nouvelle.c_max = cmax ? parseFloat(cmax) : null;
+                nouvelle.p_min = pmin ? parseFloat(pmin) : null;
+                nouvelle.p_max = pmax ? parseFloat(pmax) : null;
+            }
+
+            db.alertes.push(nouvelle);
+            await sauver("Ajout : " + nom);
+            window.location.reload();
+        }
+
+        // ================= GESTION MODAL EDITION =================
+        function ouvrirModal(i) {
+            const a = db.alertes[i];
+            document.getElementById('edit-id').value = i;
+            document.getElementById('edit-titre').innerText = "Éditer : " + a.icone + " " + a.nom;
+            document.getElementById('edit-nom').value = a.nom;
+            document.getElementById('edit-url').value = a.url;
+            document.getElementById('edit-motcle').value = a.mot_cle || "";
+            document.getElementById('modal-edit').style.display = 'block';
+        }
+
+        function fermerModal() { document.getElementById('modal-edit').style.display = 'none'; }
+
+        async function sauvegarderEdition() {
+            const i = document.getElementById('edit-id').value;
+            db.alertes[i].nom = document.getElementById('edit-nom').value.trim();
+            db.alertes[i].url = document.getElementById('edit-url').value.trim();
+            db.alertes[i].mot_cle = document.getElementById('edit-motcle').value.trim();
+            db.alertes[i].derniere_verif = "Modifié - En attente";
+            fermerModal();
+            await sauver("Mise à jour URL/Nom : " + db.alertes[i].nom);
         }
 
         async function togglePause(i) {
-            db.alertes[i].actif = (db.alertes[i].actif === false) ? true : false;
-            await sauver("Changement statut (Pause/Actif) : " + db.alertes[i].nom);
-        }
-
-        async function modifier(i) {
-            const a = db.alertes[i];
-            const nouvMot = prompt(`Modifier le mot-clé pour "${a.nom}" (laisser vide si URL exacte) :`, a.mot_cle || "");
-            if (nouvMot === null) return;
-            const nouvBud = prompt(`Modifier le budget max pour "${a.nom}" (laisser vide pour aucun) :`, a.budget_max || "");
-            if (nouvBud === null) return;
-
-            db.alertes[i].mot_cle = nouvMot.trim();
-            db.alertes[i].budget_max = nouvBud.trim() !== "" ? parseFloat(nouvBud) : null;
-            db.alertes[i].deja_signale = false; 
-            db.alertes[i].seuil_signale = false;
-            db.alertes[i].prix_initial = null;
-            db.alertes[i].prix_actuel = null;
-            db.alertes[i].derniere_verif = "Modifié - Scan imminent";
-            
-            await sauver("Mise à jour critères : " + a.nom);
+            db.alertes[i].actif = !db.alertes[i].actif;
+            await sauver("Pause/Actif");
         }
 
         async function supprimer(i) {
-            if (!confirm("Retirer définitivement ce traqueur de votre liste ?")) return;
-            const nom = db.alertes[i].nom;
+            if (!confirm("Retirer cette opération ?")) return;
             db.alertes.splice(i, 1);
-            await sauver("Retrait du traqueur : " + nom);
+            await sauver("Retrait");
         }
 
         async function sauver(msg) {
@@ -188,7 +354,41 @@
             const r = await api("PUT", { message: msg, content, sha });
             sha = r.content.sha;
             charger();
-            alert("✅ Coffre-fort mis à jour !");
+        }
+
+        // ================= BOUTON TIR MANUEL =================
+        async function lancerScanManuel() {
+            try {
+                await fetch(`https://api.github.com/repos/${user}/${repo}/actions/workflows/cron.yml/dispatches`, {
+                    method: 'POST',
+                    headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" },
+                    body: JSON.stringify({ ref: "main" })
+                });
+                alert("🚀 Missile lancé ! Le robot se réveille sur les serveurs Microsoft. La page se mettra à jour d'ici 30 secondes.");
+            } catch(e) { alert("Erreur d'envoi de la commande."); }
+        }
+
+        // ================= MONITORING QUOTA =================
+        async function estimerQuota() {
+            try {
+                // Interroge l'API GitHub pour compter le nombre de fois où le robot a tourné
+                const res = await fetch(`https://api.github.com/repos/${user}/${repo}/actions/runs?per_page=1`, {
+                    headers: { "Authorization": `token ${token}` }
+                });
+                const data = await res.json();
+                const totalRuns = data.total_count || 0;
+                
+                // Estimation très prudente : 1 scan = ~15 secondes = 0.25 minutes
+                const minutesEstimees = Math.floor(totalRuns * 0.25);
+                const pourcentage = Math.min((minutesEstimees / 2000) * 100, 100);
+                
+                document.getElementById('quota-text').innerText = `${minutesEstimees} min / 2000 min (${pourcentage.toFixed(1)}%)`;
+                document.getElementById('jauge-bar').style.width = `${pourcentage}%`;
+                
+                if(pourcentage > 80) document.getElementById('jauge-bar').style.background = "red";
+            } catch(e) {
+                document.getElementById('quota-text').innerText = "Indisponible";
+            }
         }
     </script>
 </body>
