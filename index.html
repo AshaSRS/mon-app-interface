@@ -101,7 +101,7 @@
                 <label>Mot clé à traquer (Optionnel)</label>
                 <input type="text" id="motcle" placeholder="Ex: 11.2ct">
                 <label>Budget maximum (Alerte ciblée)</label>
-                <input type="number" id="budget" placeholder="Ex: 450" step="0.01">
+                <input type="number" id="budget" placeholder="Ex: 450">
             </div>
 
             <!-- Zone spécifique RADAR -->
@@ -177,13 +177,6 @@
             <label>Nom</label><input type="text" id="edit-nom">
             <label>URL</label><input type="text" id="edit-url">
             <label>Mot Clé</label><input type="text" id="edit-motcle">
-            
-            <!-- NOUVEAU : Zone pour éditer le budget -->
-            <div id="edit-zone-budget" style="display:none; margin-top:5px;">
-                <label>Budget maximum</label>
-                <input type="number" id="edit-budget" step="0.01">
-            </div>
-
             <div class="flex-row">
                 <button class="btn-main" onclick="sauvegarderEdition()">💾 Sauvegarder</button>
                 <button class="btn-main" style="background:#444; color:white; border:1px solid #777;" onclick="fermerModal()">❌ Annuler</button>
@@ -217,7 +210,6 @@
             document.getElementById('zone_radar').style.display = type === 'nouveaute' ? 'block' : 'none';
         }
 
-        /* FONCTIONS API D'ORIGINE INTACTES */
         async function api(method, body = null) {
             const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/alertes.json`, {
                 method, headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
@@ -235,14 +227,6 @@
             } catch (e) { alert("Erreur de clé. Le coffre est verrouillé."); }
         }
 
-        /* NOUVEAU : Fonction de formatage de la devise */
-        function formatPrix(prix, devise) {
-            if (prix === null || prix === undefined || prix === "En attente") return "En attente";
-            if (!devise) return prix;
-            if (devise === "$" || devise === "£") return `${devise}${prix}`;
-            return `${prix} ${devise}`;
-        }
-
         function afficher() {
             const div = document.getElementById('liste-alertes');
             let htmlSniper = `<h4 style="color:#b8860b; border-bottom:1px solid #b8860b; padding-bottom:5px;">🎯 CIBLES SNIPER</h4>`;
@@ -254,21 +238,16 @@
                 const isRadar = a.type === 'nouveaute';
                 const icone = a.icone || "💎";
                 const badgeColor = estActif ? "background:#ffd700;" : "background:#555; color:#ccc;";
-                const devise = a.devise || "";
                 
-                // Textes de statut (avec formatage devise)
+                // Textes de statut
                 let statutTxt = "";
                 if (isRadar) {
                     statutTxt = `🔍 Statut : <span class="price-tag">${a.prix_actuel || "En attente"}</span><br>`;
                     if(a.c_min || a.c_max) statutTxt += `⚖️ Filtre : ${a.c_min||0}ct à ${a.c_max||"Max"}ct<br>`;
                     if(a.p_min || a.p_max) statutTxt += `💰 Prix : ${a.p_min||0} à ${a.p_max||"Max"}<br>`;
                 } else {
-                    const prixInit = (a.prix_initial && !isNaN(a.prix_initial)) ? formatPrix(a.prix_initial, devise) : "?";
-                    const prixAct = (a.prix_actuel && !isNaN(a.prix_actuel)) ? formatPrix(a.prix_actuel, devise) : (a.prix_actuel || "En attente");
-                    const budg = a.budget_max ? formatPrix(a.budget_max, devise) : "Aucun";
-
-                    statutTxt = `💵 Initial : ${prixInit} | 🔥 Actuel : <span class="price-tag">${prixAct}</span><br>`;
-                    if(a.budget_max) statutTxt += `🎯 Budget : ${budg}<br>`;
+                    statutTxt = `💵 Initial : ${a.prix_initial || "?"} | 🔥 Actuel : <span class="price-tag">${a.prix_actuel || "En attente"}</span><br>`;
+                    if(a.budget_max) statutTxt += `🎯 Budget : ${a.budget_max}<br>`;
                 }
 
                 const rythm = a.frequence ? `⏱️ Fréq: ${a.frequence.heures} (${a.frequence.periode})` : `⏱️ Fréq: 30m`;
@@ -312,7 +291,6 @@
                 actif: true, derniere_verif: "En attente...", 
                 deja_signale: false, seuil_signale: false,
                 prix_initial: null, prix_actuel: null, empreinte_radar: [],
-                devise: "", // Préparé pour la devise
                 frequence: {
                     jours: document.getElementById('freq_jours').value,
                     heures: document.getElementById('freq_heures').value,
@@ -345,15 +323,6 @@
             document.getElementById('edit-nom').value = a.nom;
             document.getElementById('edit-url').value = a.url;
             document.getElementById('edit-motcle').value = a.mot_cle || "";
-            
-            // NOUVEAU : Afficher le budget si c'est un prix
-            if (a.type === 'prix') {
-                document.getElementById('edit-zone-budget').style.display = 'block';
-                document.getElementById('edit-budget').value = a.budget_max || "";
-            } else {
-                document.getElementById('edit-zone-budget').style.display = 'none';
-            }
-
             document.getElementById('modal-edit').style.display = 'block';
         }
 
@@ -364,17 +333,9 @@
             db.alertes[i].nom = document.getElementById('edit-nom').value.trim();
             db.alertes[i].url = document.getElementById('edit-url').value.trim();
             db.alertes[i].mot_cle = document.getElementById('edit-motcle').value.trim();
-            
-            // NOUVEAU : Sauvegarder le budget
-            if (db.alertes[i].type === 'prix') {
-                const b = document.getElementById('edit-budget').value;
-                db.alertes[i].budget_max = b ? parseFloat(b) : null;
-                db.alertes[i].seuil_signale = false;
-            }
-
             db.alertes[i].derniere_verif = "Modifié - En attente";
             fermerModal();
-            await sauver("Mise à jour détaillée : " + db.alertes[i].nom);
+            await sauver("Mise à jour URL/Nom : " + db.alertes[i].nom);
         }
 
         async function togglePause(i) {
@@ -388,7 +349,6 @@
             await sauver("Retrait");
         }
 
-        /* FONCTION DE SAUVEGARDE ORIGINALE INTACTE */
         async function sauver(msg) {
             const content = btoa(unescape(encodeURIComponent(JSON.stringify(db, null, 2))));
             const r = await api("PUT", { message: msg, content, sha });
@@ -411,12 +371,14 @@
         // ================= MONITORING QUOTA =================
         async function estimerQuota() {
             try {
+                // Interroge l'API GitHub pour compter le nombre de fois où le robot a tourné
                 const res = await fetch(`https://api.github.com/repos/${user}/${repo}/actions/runs?per_page=1`, {
                     headers: { "Authorization": `token ${token}` }
                 });
                 const data = await res.json();
                 const totalRuns = data.total_count || 0;
                 
+                // Estimation très prudente : 1 scan = ~15 secondes = 0.25 minutes
                 const minutesEstimees = Math.floor(totalRuns * 0.25);
                 const pourcentage = Math.min((minutesEstimees / 2000) * 100, 100);
                 
