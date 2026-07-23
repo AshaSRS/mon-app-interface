@@ -216,12 +216,15 @@
             document.getElementById('zone_radar').style.display = type === 'nouveaute' ? 'block' : 'none';
         }
 
+        // ================= GESTION API ROBUSTE (POUR ÉVITER LE BLOCAGE) =================
         async function api(method, body = null) {
             const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/alertes.json`, {
                 method, headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
                 body: body ? JSON.stringify(body) : null
             });
-            return res.json();
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.message || `Erreur ${res.status}`);
+            return data;
         }
 
         async function charger() {
@@ -230,7 +233,17 @@
                 sha = r.sha;
                 db = JSON.parse(decodeURIComponent(escape(atob(r.content))));
                 afficher();
-            } catch (e) { alert("Erreur de clé. Le coffre est verrouillé."); }
+            } catch (e) { 
+                if (e.message.includes("Not Found")) {
+                    // C'est normal si le fichier n'existe pas encore !
+                    console.log("Fichier alertes.json introuvable, il sera créé à la première sauvegarde.");
+                    afficher();
+                } else if (e.message.includes("Bad credentials")) {
+                    alert("❌ Erreur : Votre clé GitHub (ghp_...) est invalide ou expirée.");
+                } else {
+                    alert("❌ Erreur d'accès au GitHub : " + e.message);
+                }
+            }
         }
 
         // Fonction pour formater joliment le prix avec la devise
@@ -386,11 +399,22 @@
             await sauver("Retrait");
         }
 
+        // ================= SAUVEGARDE ROBUSTE (POUR CRÉER LE FICHIER) =================
         async function sauver(msg) {
-            const content = btoa(unescape(encodeURIComponent(JSON.stringify(db, null, 2))));
-            const r = await api("PUT", { message: msg, content, sha });
-            sha = r.content.sha;
-            charger();
+            try {
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(db, null, 2))));
+                const payload = { message: msg, content };
+                if (sha) payload.sha = sha; // On n'envoie le code secret SHA que si le fichier existe déjà
+                
+                const r = await api("PUT", payload);
+                if (r && r.content && r.content.sha) {
+                    sha = r.content.sha;
+                }
+                charger();
+            } catch (e) {
+                alert("❌ Opération impossible : " + e.message + "\n\n1. Vérifiez que le dépôt s'appelle bien '" + repo + "'.\n2. Vérifiez que votre Clé GitHub a bien les droits 'Contents: Read & Write'.");
+                throw e; 
+            }
         }
 
         // ================= BOUTON TIR MANUEL =================
