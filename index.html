@@ -178,7 +178,8 @@
             <label>URL</label><input type="text" id="edit-url">
             <label>Mot Clé</label><input type="text" id="edit-motcle">
             
-            <div id="edit-zone-budget" style="display:none;">
+            <!-- NOUVEAU : Zone pour éditer le budget -->
+            <div id="edit-zone-budget" style="display:none; margin-top:5px;">
                 <label>Budget maximum</label>
                 <input type="number" id="edit-budget" step="0.01">
             </div>
@@ -216,15 +217,13 @@
             document.getElementById('zone_radar').style.display = type === 'nouveaute' ? 'block' : 'none';
         }
 
-        // ================= GESTION API ROBUSTE (POUR ÉVITER LE BLOCAGE) =================
+        /* FONCTIONS API D'ORIGINE INTACTES */
         async function api(method, body = null) {
             const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/alertes.json`, {
                 method, headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
                 body: body ? JSON.stringify(body) : null
             });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.message || `Erreur ${res.status}`);
-            return data;
+            return res.json();
         }
 
         async function charger() {
@@ -233,22 +232,12 @@
                 sha = r.sha;
                 db = JSON.parse(decodeURIComponent(escape(atob(r.content))));
                 afficher();
-            } catch (e) { 
-                if (e.message.includes("Not Found")) {
-                    // C'est normal si le fichier n'existe pas encore !
-                    console.log("Fichier alertes.json introuvable, il sera créé à la première sauvegarde.");
-                    afficher();
-                } else if (e.message.includes("Bad credentials")) {
-                    alert("❌ Erreur : Votre clé GitHub (ghp_...) est invalide ou expirée.");
-                } else {
-                    alert("❌ Erreur d'accès au GitHub : " + e.message);
-                }
-            }
+            } catch (e) { alert("Erreur de clé. Le coffre est verrouillé."); }
         }
 
-        // Fonction pour formater joliment le prix avec la devise
+        /* NOUVEAU : Fonction de formatage de la devise */
         function formatPrix(prix, devise) {
-            if (!prix || prix === "En attente") return "En attente";
+            if (prix === null || prix === undefined || prix === "En attente") return "En attente";
             if (!devise) return prix;
             if (devise === "$" || devise === "£") return `${devise}${prix}`;
             return `${prix} ${devise}`;
@@ -267,7 +256,7 @@
                 const badgeColor = estActif ? "background:#ffd700;" : "background:#555; color:#ccc;";
                 const devise = a.devise || "";
                 
-                // Textes de statut
+                // Textes de statut (avec formatage devise)
                 let statutTxt = "";
                 if (isRadar) {
                     statutTxt = `🔍 Statut : <span class="price-tag">${a.prix_actuel || "En attente"}</span><br>`;
@@ -277,7 +266,7 @@
                     const prixInit = (a.prix_initial && !isNaN(a.prix_initial)) ? formatPrix(a.prix_initial, devise) : "?";
                     const prixAct = (a.prix_actuel && !isNaN(a.prix_actuel)) ? formatPrix(a.prix_actuel, devise) : (a.prix_actuel || "En attente");
                     const budg = a.budget_max ? formatPrix(a.budget_max, devise) : "Aucun";
-                    
+
                     statutTxt = `💵 Initial : ${prixInit} | 🔥 Actuel : <span class="price-tag">${prixAct}</span><br>`;
                     if(a.budget_max) statutTxt += `🎯 Budget : ${budg}<br>`;
                 }
@@ -323,7 +312,7 @@
                 actif: true, derniere_verif: "En attente...", 
                 deja_signale: false, seuil_signale: false,
                 prix_initial: null, prix_actuel: null, empreinte_radar: [],
-                devise: "",
+                devise: "", // Préparé pour la devise
                 frequence: {
                     jours: document.getElementById('freq_jours').value,
                     heures: document.getElementById('freq_heures').value,
@@ -357,6 +346,7 @@
             document.getElementById('edit-url').value = a.url;
             document.getElementById('edit-motcle').value = a.mot_cle || "";
             
+            // NOUVEAU : Afficher le budget si c'est un prix
             if (a.type === 'prix') {
                 document.getElementById('edit-zone-budget').style.display = 'block';
                 document.getElementById('edit-budget').value = a.budget_max || "";
@@ -371,21 +361,20 @@
 
         async function sauvegarderEdition() {
             const i = document.getElementById('edit-id').value;
-            const a = db.alertes[i];
+            db.alertes[i].nom = document.getElementById('edit-nom').value.trim();
+            db.alertes[i].url = document.getElementById('edit-url').value.trim();
+            db.alertes[i].mot_cle = document.getElementById('edit-motcle').value.trim();
             
-            a.nom = document.getElementById('edit-nom').value.trim();
-            a.url = document.getElementById('edit-url').value.trim();
-            a.mot_cle = document.getElementById('edit-motcle').value.trim();
-            
-            if (a.type === 'prix') {
+            // NOUVEAU : Sauvegarder le budget
+            if (db.alertes[i].type === 'prix') {
                 const b = document.getElementById('edit-budget').value;
-                a.budget_max = b ? parseFloat(b) : null;
-                a.seuil_signale = false;
+                db.alertes[i].budget_max = b ? parseFloat(b) : null;
+                db.alertes[i].seuil_signale = false;
             }
 
-            a.derniere_verif = "Modifié - En attente";
+            db.alertes[i].derniere_verif = "Modifié - En attente";
             fermerModal();
-            await sauver("Mise à jour détaillée : " + a.nom);
+            await sauver("Mise à jour détaillée : " + db.alertes[i].nom);
         }
 
         async function togglePause(i) {
@@ -399,22 +388,12 @@
             await sauver("Retrait");
         }
 
-        // ================= SAUVEGARDE ROBUSTE (POUR CRÉER LE FICHIER) =================
+        /* FONCTION DE SAUVEGARDE ORIGINALE INTACTE */
         async function sauver(msg) {
-            try {
-                const content = btoa(unescape(encodeURIComponent(JSON.stringify(db, null, 2))));
-                const payload = { message: msg, content };
-                if (sha) payload.sha = sha; // On n'envoie le code secret SHA que si le fichier existe déjà
-                
-                const r = await api("PUT", payload);
-                if (r && r.content && r.content.sha) {
-                    sha = r.content.sha;
-                }
-                charger();
-            } catch (e) {
-                alert("❌ Opération impossible : " + e.message + "\n\n1. Vérifiez que le dépôt s'appelle bien '" + repo + "'.\n2. Vérifiez que votre Clé GitHub a bien les droits 'Contents: Read & Write'.");
-                throw e; 
-            }
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(db, null, 2))));
+            const r = await api("PUT", { message: msg, content, sha });
+            sha = r.content.sha;
+            charger();
         }
 
         // ================= BOUTON TIR MANUEL =================
